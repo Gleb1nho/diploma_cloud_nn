@@ -99,6 +99,10 @@ class CloudDetectorLearner:
                 torch.save(self._model, '../best_model.pth')
                 print('Model saved!')
 
+            if i == 10:
+                self._optimizer.param_groups[0]['lr'] = 1e-5
+                print('Decrease decoder learning rate to 1e-6!')
+
             if i == 25:
                 self._optimizer.param_groups[0]['lr'] = 1e-6
                 print('Decrease decoder learning rate to 1e-6!')
