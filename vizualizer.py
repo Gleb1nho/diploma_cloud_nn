@@ -18,10 +18,10 @@ def visualize(**images):
     plt.show()
 
 
-def show_model_results(test_set):
+def show_model_results(test_set, best_model):
     """Функция для просмотра результатов работы"""
-    best_model = torch.load('./best_model.pth')
-    for i in range(1):
+    best_model = torch.load(best_model)
+    for i in range(10):
         n = np.random.choice(len(test_set))
         image, gt_mask = test_set[n]
 

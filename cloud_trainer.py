@@ -52,9 +52,12 @@ class CloudDetectorLearner:
         self._metrics = [
             smp.utils.metrics.IoU(threshold=0.5),
         ]
+
         self._optimizer = torch.optim.Adam([
-            dict(params=self._model.parameters(), lr=1e-4),
+            dict(params=self._model.parameters(), lr=1e-3),
         ])
+
+        self._scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self._optimizer, self._epochs_count)
 
         self._train_epoch = smp.utils.train.TrainEpoch(
             self._model,
@@ -77,7 +80,7 @@ class CloudDetectorLearner:
 
     def start_training(self):
         print(f'Запуск обучения модели с энкодером {self._encoder_name}')
-        logs_path = f'../logs/{datetime.date(datetime.now())}{self._encoder_name}_unet_loss_jaccard'
+        logs_path = f'../logs/{datetime.date(datetime.now())}{self._encoder_name}_unet_loss_jaccard_schedule'
 
         for i in range(0, self._epochs_count):
             print('\nEpoch: {}'.format(i))
@@ -96,13 +99,8 @@ class CloudDetectorLearner:
             # do something (save model, change lr, etc.)
             if self._max_score < valid_logs['iou_score']:
                 self._max_score = valid_logs['iou_score']
-                torch.save(self._model, '../best_model.pth')
+                torch.save(self._model, f'../{self._encoder_name}_best_model.pth')
                 print('Model saved!')
 
-            if i == 10:
-                self._optimizer.param_groups[0]['lr'] = 1e-5
-                print('Decrease decoder learning rate to 1e-6!')
-
-            if i == 25:
-                self._optimizer.param_groups[0]['lr'] = 1e-6
-                print('Decrease decoder learning rate to 1e-6!')
+            self._scheduler.step()
+            print(self._scheduler.get_last_lr())
