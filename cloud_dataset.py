@@ -35,3 +35,23 @@ class CloudDataset(Dataset):
     def __len__(self):
         return len(list(self.image_set))
 
+
+class ShowCloudDataset(Dataset):
+    def __init__(self, image_set):
+        self.image_set = image_set
+
+    def __getitem__(self, index):
+        raw = cv2.normalize(
+                cv2.imread(self.image_set[index]),
+                None,
+                alpha=0,
+                beta=1,
+                norm_type=cv2.NORM_MINMAX,
+                dtype=cv2.CV_32F
+            )
+        rgb = cv2.cvtColor(raw, cv2.COLOR_BGR2RGB)
+        return torch.from_numpy(rgb).permute(2, 0, 1)
+
+    def __len__(self):
+        return len(list(self.image_set))
+

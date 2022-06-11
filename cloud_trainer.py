@@ -3,6 +3,7 @@ from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 import segmentation_models_pytorch as smp
 from torch.utils.data import DataLoader
+import numpy as np
 
 
 class CloudDetectorLearner:
@@ -48,7 +49,7 @@ class CloudDetectorLearner:
             num_workers=valid_workers_count
         )
 
-        self._loss = smp.utils.losses.JaccardLoss()
+        self._loss = smp.utils.losses.DiceLoss()
         self._metrics = [
             smp.utils.metrics.IoU(threshold=0.5),
         ]
@@ -80,7 +81,7 @@ class CloudDetectorLearner:
 
     def start_training(self):
         print(f'Запуск обучения модели с энкодером {self._encoder_name}')
-        logs_path = f'../logs/{datetime.date(datetime.now())}{self._encoder_name}_unet_loss_jaccard_schedule'
+        logs_path = f'../logs/{datetime.date(datetime.now())}{self._encoder_name}_unet_loss_dice_schedule'
 
         for i in range(0, self._epochs_count):
             print('\nEpoch: {}'.format(i))
@@ -92,14 +93,14 @@ class CloudDetectorLearner:
             writer = SummaryWriter(logs_path)
             writer.add_scalar('Accuracy/train', train_logs['iou_score'], i)
             writer.add_scalar('Accuracy/valid', valid_logs['iou_score'], i)
-            writer.add_scalar('Loss/train', train_logs['jaccard_loss'], i)
-            writer.add_scalar('Loss/valid', valid_logs['jaccard_loss'], i)
+            writer.add_scalar('Loss/train', train_logs['dice_loss'], i)
+            writer.add_scalar('Loss/valid', valid_logs['dice_loss'], i)
             writer.close()
 
             # do something (save model, change lr, etc.)
             if self._max_score < valid_logs['iou_score']:
                 self._max_score = valid_logs['iou_score']
-                torch.save(self._model, f'../{self._encoder_name}_best_model.pth')
+                torch.save(self._model, f'../{self._encoder_name}_dice_loss_best_model.pth')
                 print('Model saved!')
 
             self._scheduler.step()

@@ -1,6 +1,6 @@
 from cloud_trainer import CloudDetectorLearner
-from vizualizer import visualize, show_model_results
-from cloud_dataset import CloudDataset
+from vizualizer import visualize, show_model_results, show_large_image_results
+from cloud_dataset import CloudDataset, ShowCloudDataset
 
 import sys
 
@@ -72,7 +72,7 @@ main.py --show C:/Users/Gleb1nho/Desktop/cv-and-ml/contest/data C:/Users/Gleb1nh
                 valid_batch_size=batch_size,
                 train_workers_count=train_workers,
                 valid_workers_count=valid_workers,
-                encoder_name=encoder
+                encoder_name=encoder,
             )
 
             trainer.start_training()
@@ -113,5 +113,16 @@ main.py --show C:/Users/Gleb1nho/Desktop/cv-and-ml/contest/data C:/Users/Gleb1nh
             # )
 
             show_model_results(CloudDataset(valid_set), bst_model)
-    except IndexError:
+        elif sys.argv[1] == '--large':
+            images = [
+                '../clouds/large_cloud1_RGB.tif',
+                '../clouds/large_cloud2_RGB.tif',
+                '../clouds/laege_cloud3_RGB.tif'
+            ]
+            show_large_image_results(
+                ShowCloudDataset(images),
+                'C:/Users/Gleb1nho/Desktop/diploma/codes/efficientnet-b0_best_model.pth'
+            )
+    except IndexError as e:
+        print(e)
         print(help_string)
