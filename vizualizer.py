@@ -42,7 +42,7 @@ def show_large_image_results(test_set, best_model, tile_size=512):
     best_model = torch.load(best_model)
 
     for i in range(len(test_set)):
-        image = test_set[i]
+        image, rgb, nir = test_set[i]
 
         x_tensor = image.to('cuda').float()
 
@@ -71,6 +71,8 @@ def show_large_image_results(test_set, best_model, tile_size=512):
         result_image = Image.fromarray(np.uint8(np.reshape(result, (h, w)) * 255), 'L')
 
         visualize(
-            image=image.permute(1, 2, 0),
+            # image=image.permute(1, 2, 0),
+            rgb=rgb,
+            nir=nir,
             predicted=result_image
         )

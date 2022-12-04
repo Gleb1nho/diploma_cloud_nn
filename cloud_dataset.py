@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from torch.utils.data import Dataset
 import torch
 from torchvision.transforms import ToTensor
@@ -49,8 +50,26 @@ class ShowCloudDataset(Dataset):
                 norm_type=cv2.NORM_MINMAX,
                 dtype=cv2.CV_32F
             )
+
+        nir = cv2.normalize(
+            cv2.imread(self.image_set[index].replace('RGB', 'NIR'), 0),
+            None,
+            alpha=0,
+            beta=1,
+            norm_type=cv2.NORM_MINMAX,
+            dtype=cv2.CV_32F
+        )
+
+        # nir = cv2.imread(self.image_set[index].replace('RGB', 'NIR'), 0) / 255
+
         rgb = cv2.cvtColor(raw, cv2.COLOR_BGR2RGB)
-        return torch.from_numpy(rgb).permute(2, 0, 1)
+
+        resized_rgb = cv2.resize(rgb, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
+        resized_nir = cv2.resize(nir, dsize=(256, 256), interpolation=cv2.INTER_CUBIC)
+
+        image = torch.from_numpy(np.dstack((resized_rgb, resized_nir))).permute(2, 0, 1)
+
+        return image, resized_rgb, resized_nir
 
     def __len__(self):
         return len(list(self.image_set))
