@@ -16,8 +16,8 @@ class WaterDetectorLearner:
             activation='sigmoid',
             device='cuda',
             epochs_count=50,
-            train_batch_size=10,
-            valid_batch_size=10,
+            train_batch_size=3,
+            valid_batch_size=3,
             train_workers_count=1,
             valid_workers_count=1,
             lr=1e-3
@@ -32,7 +32,7 @@ class WaterDetectorLearner:
         self._model = smp.Unet(
             encoder_name=self._encoder_name,
             encoder_weights=self._encoder_weights,
-            in_channels=4,
+            in_channels=3,
             classes=1,
             activation=self._activation
         )
@@ -83,7 +83,7 @@ class WaterDetectorLearner:
 
     def start_training(self):
         print(f'Запуск обучения модели с энкодером {self._encoder_name}')
-        logs_path = f'../logs/wotah/{datetime.date(datetime.now())}_{self._encoder_name}_unet_loss_dice_schedule'
+        logs_path = f'../logs/wotah/deepglobe/{datetime.date(datetime.now())}_{self._encoder_name}_unet_loss_dice_schedule'
 
         for i in range(0, self._epochs_count):
             print('\nEpoch: {}'.format(i))
@@ -102,7 +102,7 @@ class WaterDetectorLearner:
             # do something (save model, change lr, etc.)
             if self._max_score < valid_logs['iou_score']:
                 self._max_score = valid_logs['iou_score']
-                torch.save(self._model, f'../water_exp2_dice_loss_best_model.pth')
+                torch.save(self._model, f'../deepglobe_water_exp2_dice_loss_best_model.pth')
                 print('Model saved!')
 
             self._scheduler.step()
